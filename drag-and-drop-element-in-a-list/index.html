@@ -1,0 +1,180 @@
+<html lang="en"><head>
+    <meta charset="utf-8">
+    <title>HTML DOM - Drag and drop element in a list</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="author" content="Nguyen Huu Phuoc">
+	<meta name="description" content="Manage HTML DOM with vanilla JavaScript">
+    
+	<meta name="twitter:site" content="@nghuuphuoc">
+	<meta name="twitter:title" content="Manage HTML DOM with vanilla JavaScript">
+	<meta name="twitter:description" content="Manage HTML DOM with vanilla JavaScript">
+    <meta name="twitter:creator" content="@nghuuphuoc">
+    <meta name="twitter:image" content="https://htmldom.dev/assets/screenshot.png">
+
+	<meta property="og:site_name" content="HTML DOM">
+	<meta property="og:title" content="Manage HTML DOM with vanilla JavaScript">
+	<meta property="og:description" content="Manage HTML DOM with vanilla JavaScript">
+    <meta property="og:url" content="https://htmldom.dev">
+    <meta property="og:image" content="https://htmldom.dev/assets/screenshot.png">
+    
+    <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro&amp;display=swap" rel="stylesheet">
+<link href="/html-dom/vendor-styles.f51019ab61c61bfaec14.css" rel="stylesheet"><link href="/html-dom/client.3072e4ce2bf9ca91f138.css" rel="stylesheet"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://www.googletagmanager.com"><link rel="preconnect" href="https://www.google-analytics.com"><script charset="utf-8" src="/html-dom/posts-add-or-remove-class-from-an-element~posts-allow-to-enter-particular-characters-only~posts-appe~7d800c42.9c372392c5470c46721a.js"></script><script charset="utf-8" src="/html-dom/posts-add-or-remove-class-from-an-element~posts-allow-to-enter-particular-characters-only~posts-appe~98070671.eb632b1036286151ad8b.js"></script><script charset="utf-8" src="/html-dom/posts-allow-to-enter-particular-characters-only~posts-communication-between-an-iframe-and-its-parent~d35237b2.d6e2c58f381bcc69e41d.js"></script><script charset="utf-8" src="/html-dom/posts-drag-and-drop-element-in-a-list.911c159042b0327785cd.js"></script><meta name="description" content="Drag and drop element in a list" data-react-helmet="true"><meta name="keywords" content="
+            addEventListener, drag drop list, getBoundingClientRect, insert node before, insertBefore,
+            mousedown event, mousemove event, mouseup event, next sibling, nextElementSibling,
+            previous sibling, previousElementSibling, sortable list, swap nodes
+        " data-react-helmet="true"><link rel="preconnect" href="https://fonts.gstatic.com"></head>
+<body class="font-sans w-full">
+    <div id="root" class="flex flex-col min-h-full"><div class="flex-1 px-2 lg:px-0"><div class="ml-auto mr-auto max-w-3xl mb-8"><div class="flex items-center justify-between py-8"><a class="bg-black p-1 rounded text-2xl sm:text-3xl font-light text-white" href="/html-dom/">&lt;/dom&gt;</a><div class="w-2/3 sm:w-1/2"><div class="w-full relative"><div class="border-b border-gray-400"><input class="border-none w-full p-2 flex-1" placeholder="Filter" value=""></div><button class="absolute border-none p-2 right-0 top-0"><svg viewBox="0 0 24 24" style="fill:none;height:24px;stroke:rgba(0,0,0,.4);stroke-linecap:round;stroke-linejoin:round;stroke-width:1;width:24px"><path d="M10.5,0.5c5.523,0,10,4.477,10,10s-4.477,10-10,10s-10-4.477-10-10S4.977,0.5,10.5,0.5z M23.5,23.5 l-5.929-5.929"></path></svg></button></div></div></div><div class="mt-32 text-center"><span class="bg-black text-white text-3xl px-3 py-2 rounded">28/95</span></div><h1 class="font-bold mt-4 mb-4 text-center text-3xl lg:text-4xl px-1">Drag and drop element in a list</h1><div class="mb-12 text-center"><a class="text-2xl bg-gray-400 px-4 py-2" href="https://github.com/phuoc-ng/html-dom/blob/master/client/posts/drag-and-drop-element-in-a-list/index.tsx" rel="noopener noreferrer" target="_blank" style="text-decoration:none">Edit this page</a></div><div class="mb-4"><p class="mb-2">In this example, we will create a sortable list whose items can be dragged and dropped inside it:</p><pre class="hljs mb-8"><code class="html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"list"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"draggable"</span>&gt;</span>A<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"draggable"</span>&gt;</span>B<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"draggable"</span>&gt;</span>C<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"draggable"</span>&gt;</span>D<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"draggable"</span>&gt;</span>E<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre><p class="mb-2">Each item has class of <code>draggable</code> indicating that user can drag it:</p><pre class="hljs mb-8"><code class="css"><span class="hljs-selector-class">.draggable</span> {
+    <span class="hljs-attribute">cursor</span>: move;
+    <span class="hljs-attribute">user-select</span>: none;
+}</code></pre><h2 class="text-2xl sm:text-3xl mb-4">Make items draggable</h2><p class="mb-2">By using the similar approach mentioned in the <a class="underline" href="/html-dom/make-a-draggable-element"><em>Make a draggable element</em></a> post,
+we can turn each item into a draggable element:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-comment">// The current dragging item</span>
+<span class="hljs-keyword">let</span> draggingEle;
+
+<span class="hljs-comment">// The current position of mouse relative to the dragging element</span>
+<span class="hljs-keyword">let</span> x = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">let</span> y = <span class="hljs-number">0</span>;
+
+<span class="hljs-keyword">const</span> mouseDownHandler = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>) </span>{
+    <span class="hljs-keyword">const</span> draggingEle = e.target;
+
+    <span class="hljs-comment">// Calculate the mouse position</span>
+    <span class="hljs-keyword">const</span> rect = draggingEle.getBoundingClientRect();
+    x = e.pageX - rect.left;
+    y = e.pageY - rect.top;
+
+    <span class="hljs-comment">// Attach the listeners to `document`</span>
+    <span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">'mousemove'</span>, mouseMoveHandler);
+    <span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">'mouseup'</span>, mouseUpHandler);
+};
+
+<span class="hljs-keyword">const</span> mouseMoveHandler = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>) </span>{
+    <span class="hljs-comment">// Set position for dragging element</span>
+    draggingEle.style.position = <span class="hljs-string">'absolute'</span>;
+    draggingEle.style.top = <span class="hljs-string">`<span class="hljs-subst">${e.pageY - y}</span>px`</span>; 
+    draggingEle.style.left = <span class="hljs-string">`<span class="hljs-subst">${e.pageX - x}</span>px`</span>;
+};</code></pre><p class="mb-2">The <code>mouseup</code> event handler will remove the position styles of dragging item and cleans up the event handlers:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-keyword">const</span> mouseUpHandler = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-comment">// Remove the position styles</span>
+    draggingEle.style.removeProperty(<span class="hljs-string">'top'</span>);
+    draggingEle.style.removeProperty(<span class="hljs-string">'left'</span>);
+    draggingEle.style.removeProperty(<span class="hljs-string">'position'</span>);
+
+    x = <span class="hljs-literal">null</span>;
+    y = <span class="hljs-literal">null</span>;
+    draggingEle = <span class="hljs-literal">null</span>;
+
+    <span class="hljs-comment">// Remove the handlers of `mousemove` and `mouseup`</span>
+    <span class="hljs-built_in">document</span>.removeEventListener(<span class="hljs-string">'mousemove'</span>, mouseMoveHandler);
+    <span class="hljs-built_in">document</span>.removeEventListener(<span class="hljs-string">'mouseup'</span>, mouseUpHandler);
+};</code></pre><p class="mb-2">Now we can attach the <code>mousedown</code> event to each item by <a class="underline" href="/html-dom/loop-over-a-nodelist">looping over</a> the list of items:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-comment">// Query the list element</span>
+<span class="hljs-keyword">const</span> list = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'list'</span>);
+
+<span class="hljs-comment">// Query all items</span>
+[].slice.call(list.querySelectorAll(<span class="hljs-string">'.draggable'</span>)).forEach(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">item</span>) </span>{
+    item.addEventListener(<span class="hljs-string">'mousedown'</span>, mouseDownHandler);
+});</code></pre><h2 class="text-2xl sm:text-3xl mb-4">Add a placeholder</h2><p class="mb-2">Let's take a look at the list of items again:</p><pre class="hljs mb-8"><code class="html">A
+B
+C
+D
+E</code></pre><p class="mb-2">When we drag an item, <code>C</code> for example, the next item (<code>D</code>) will move up to the top and takes the area of the dragging element (<code>C</code>).
+To fix that, we create a dynamic placeholder element and <a class="underline" href="/html-dom/insert-an-element-after-or-before-other-element">insert it</a> right before the dragging element.
+The height of placeholder must be the same as dragging element.</p><p class="mb-2">The placeholder is created once during the mouse moving, so we add a new flag <code>isDraggingStarted</code> to track it:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-keyword">let</span> placeholder;
+<span class="hljs-keyword">let</span> isDraggingStarted = <span class="hljs-literal">false</span>;
+
+<span class="hljs-keyword">const</span> mouseMoveHandler = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>) </span>{
+    <span class="hljs-keyword">const</span> draggingRect = draggingEle.getBoundingClientRect();
+
+    <span class="hljs-keyword">if</span> (!isDraggingStarted) {
+        <span class="hljs-comment">// Update the flag</span>
+        isDraggingStarted = <span class="hljs-literal">true</span>;
+        
+        <span class="hljs-comment">// Let the placeholder take the height of dragging element</span>
+        <span class="hljs-comment">// So the next element won't move up</span>
+        placeholder = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>);
+        placeholder.classList.add(<span class="hljs-string">'placeholder'</span>);
+        draggingEle.parentNode.insertBefore(
+            placeholder,
+            draggingEle.nextSibling
+        );
+
+        <span class="hljs-comment">// Set the placeholder's height</span>
+        placeholder.style.height = <span class="hljs-string">`<span class="hljs-subst">${draggingRect.height}</span>px`</span>;
+    }
+    
+    ...
+}</code></pre><p class="mb-2">The placeholder will be <a class="underline" href="/html-dom/remove-an-element">removed</a> as soon as the users drop the item:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-keyword">const</span> mouseUpHandler = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-comment">// Remove the placeholder</span>
+    placeholder &amp;&amp; placeholder.parentNode.removeChild(placeholder);
+    
+    ...
+};</code></pre><p class="mb-2">Here is the order of element when user drags and moves an item around:</p><pre class="hljs mb-8"><code class="html">A
+B
+placeholder   &lt;- The dynamic placeholder
+C             &lt;- The dragging item
+D
+E</code></pre><h2 class="text-2xl sm:text-3xl mb-4">Determine if user moves item up or down</h2><p class="mb-2">First of all, we need a helper function to check if an item is above or below another one.</p><p class="mb-2">A <code>nodeA</code> is treated as above of <code>nodeB</code> if the horizontal center point of <code>nodeA</code> is less than <code>nodeB</code>.
+The center point of a node can be calculated by taking the sum of its top and half of its height:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-keyword">const</span> isAbove = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">nodeA, nodeB</span>) </span>{
+    <span class="hljs-comment">// Get the bounding rectangle of nodes</span>
+    <span class="hljs-keyword">const</span> rectA = nodeA.getBoundingClientRect();
+    <span class="hljs-keyword">const</span> rectB = nodeB.getBoundingClientRect();
+
+    <span class="hljs-keyword">return</span> (rectA.top + rectA.height / <span class="hljs-number">2</span> &lt; rectB.top + rectB.height / <span class="hljs-number">2</span>);
+};</code></pre><p class="mb-2">As user moves the item around, we define the previous and next <a class="underline" href="/html-dom/get-siblings-of-an-element">sibling items</a>:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-keyword">const</span> mouseMoveHandler = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>) </span>{
+    <span class="hljs-comment">// The current order:</span>
+    <span class="hljs-comment">// prevEle</span>
+    <span class="hljs-comment">// draggingEle</span>
+    <span class="hljs-comment">// placeholder</span>
+    <span class="hljs-comment">// nextEle</span>
+    <span class="hljs-keyword">const</span> prevEle = draggingEle.previousElementSibling;
+    <span class="hljs-keyword">const</span> nextEle = placeholder.nextElementSibling;    
+};</code></pre><p class="mb-2">If user moves the item to the top, we will swap the placeholder and the previous item:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-keyword">const</span> mouseMoveHandler = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>) </span>{
+    ...
+
+    <span class="hljs-comment">// User moves item to the top</span>
+    <span class="hljs-keyword">if</span> (prevEle &amp;&amp; isAbove(draggingEle, prevEle)) {
+        <span class="hljs-comment">// The current order    -&gt; The new order</span>
+        <span class="hljs-comment">// prevEle              -&gt; placeholder</span>
+        <span class="hljs-comment">// draggingEle          -&gt; draggingEle</span>
+        <span class="hljs-comment">// placeholder          -&gt; prevEle</span>
+        swap(placeholder, draggingEle);
+        swap(placeholder, prevEle);
+        <span class="hljs-keyword">return</span>;
+    }
+};</code></pre><p class="mb-2">Similarly, we will swap the next and dragging item if we detect that user moves item down to the bottom:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-keyword">const</span> mouseMoveHandler = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>) </span>{
+    ...
+
+    <span class="hljs-comment">// User moves the dragging element to the bottom</span>
+    <span class="hljs-keyword">if</span> (nextEle &amp;&amp; isAbove(nextEle, draggingEle)) {
+        <span class="hljs-comment">// The current order    -&gt; The new order</span>
+        <span class="hljs-comment">// draggingEle          -&gt; nextEle</span>
+        <span class="hljs-comment">// placeholder          -&gt; placeholder</span>
+        <span class="hljs-comment">// nextEle              -&gt; draggingEle</span>
+        swap(nextEle, placeholder);
+        swap(nextEle, draggingEle);
+    }
+};</code></pre><p class="mb-2">Here, <code>swap</code> is a small function for <a class="underline" href="/html-dom/swap-two-nodes">swapping two nodes</a>:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-keyword">const</span> swap = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">nodeA, nodeB</span>) </span>{
+    <span class="hljs-keyword">const</span> parentA = nodeA.parentNode;
+    <span class="hljs-keyword">const</span> siblingA = nodeA.nextSibling === nodeB ? nodeA : nodeA.nextSibling;
+
+    <span class="hljs-comment">// Move `nodeA` to before the `nodeB`</span>
+    nodeB.parentNode.insertBefore(nodeA, nodeB);
+
+    <span class="hljs-comment">// Move `nodeB` to before the sibling of `nodeA`</span>
+    parentA.insertBefore(nodeB, siblingA);
+};</code></pre><p class="mb-2">Following is the final demo. Try to drag and drop any item!</p><div class="my-4"><div class="inline-flex px-2 py-1 bg-gray-400"><div class="mr-2">Demo</div>(<a class="underline" href="https://github.com/phuoc-ng/html-dom/blob/master//demo/drag-and-drop-element-in-a-list/index.html" target="_blank">source</a>)</div><div class="border border-gray-400 relative"><iframe class="border-none w-full" src="/html-dom/demo/drag-and-drop-element-in-a-list/index.html" style="height:624px"></iframe></div></div><h2 class="text-2xl sm:text-3xl mb-4 mt-8">Might be useful</h2><ul><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/add-or-remove-class-from-an-element"><span>Add or remove class from an element</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/attach-or-detach-an-event-handler"><span>Attach or detach an event handler</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/calculate-the-mouse-position-relative-to-an-element"><span>Calculate the mouse position relative to an element</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/create-an-element"><span>Create an element</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/drag-and-drop-table-column"><span>Drag and drop table column</span><span class="p-1 text-white rounded bg-red-600">advanced</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/drag-and-drop-table-row"><span>Drag and drop table row</span><span class="p-1 text-white rounded bg-red-600">advanced</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/get-siblings-of-an-element"><span>Get siblings of an element</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/insert-an-element-after-or-before-other-element"><span>Insert an element after or before other element</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/loop-over-a-nodelist"><span>Loop over a nodelist</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/make-a-draggable-element"><span>Make a draggable element</span><span class="p-1 text-white rounded bg-red-600">advanced</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/remove-an-element"><span>Remove an element</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/select-an-element-or-list-of-elements"><span>Select an element or list of elements</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/set-css-style-for-an-element"><span>Set css style for an element</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li></ul></div><div class="mb-2"><a class="text-xl sm:text-2xl" title="Download a file" href="/html-dom/download-a-file">← Download a file</a></div><div class="mb-2 text-right"><a class="text-xl sm:text-2xl" title="Drag and drop table column" href="/html-dom/drag-and-drop-table-column">Drag and drop table column →</a></div></div></div><div class="border-t pt-6 pb-16 border-gray-400"><div class="ml-auto mr-auto max-w-3xl px-2 lg:px-0"><div class="text-center mb-8"><div class="mb-4">Hit the Subscribe button for the latest news on my tools. No spam. Ever!</div><form action="https://csslayout.us4.list-manage.com/subscribe/post?u=77d0bf6497a2cdbb36f08587c&amp;id=e8a912009a" method="post" name="mc-embedded-subscribe-form" target="_blank" novalidate=""><input class="border border-gray-400 p-2 w-56 sm:w-64" type="email" name="EMAIL" placeholder="Email address" required=""><div aria-hidden="true" style="left:-5000px;position:absolute"><input type="text" name="b_77d0bf6497a2cdbb36f08587c_e8a912009a" tabindex="-1"></div><button type="submit" name="subscribe" class="bg-blue-600 border border-blue-600 px-4 py-2 text-white">Subscribe</button></form></div><div><h3 class="text-xl sm:text-2xl font-semibold mb-2">Products</h3><ul class="flex flex-wrap -ml-1 -mr-1"><li class="w-1/2 sm:w-1/3 px-1 mb-6"><a href="https://blur.page" rel="noopener noreferrer" target="_blank" title="BlurPage - a browser extension to hide sensitive element on page" style="text-decoration:none"><div class="font-semibold">Blur Page</div><span class="text-gray-600">a browser extension to hide sensitive element on page</span></a></li><li class="w-1/2 sm:w-1/3 px-1 mb-6"><a href="https://csslayout.io" rel="noopener noreferrer" target="_blank" title="CSS Layout - a collection of popular layouts and patterns made with CSS" style="text-decoration:none"><div class="font-semibold">CSS Layout</div><span class="text-gray-600">a collection of popular layouts and patterns made with CSS</span></a></li><li class="w-1/2 sm:w-1/3 px-1 mb-6"><a href="https://fakenumbers.io" rel="noopener noreferrer" target="_blank" title="Fake Numbers - a JavaScript library to fake a number" style="text-decoration:none"><div class="font-semibold">Fake Numbers</div><span class="text-gray-600">a JavaScript library to fake a number</span></a></li><li class="w-1/2 sm:w-1/3 px-1 mb-6"><a href="https://formvalidation.io" rel="noopener noreferrer" target="_blank" title="FormValidation - the best validation library for JavaScript" style="text-decoration:none"><div class="font-semibold">Form Validation</div><span class="text-gray-600">the best validation library for JavaScript</span></a></li><li class="w-1/2 sm:w-1/3 px-1 mb-6"><a href="https://htmldom.dev" rel="noopener noreferrer" target="_blank" title="HTML DOM - Common tasks of managing HTML DOM with native API" style="text-decoration:none"><div class="font-semibold">HTML DOM</div><span class="text-gray-600">common tasks of managing HTML DOM with vanilla JavaScript</span></a></li><li class="w-1/2 sm:w-1/3 px-1 mb-6"><a href="https://react-pdf-viewer.dev" rel="noopener noreferrer" target="_blank" title="React PDF Viewer - a PDF viewer made for React" style="text-decoration:none"><div class="font-semibold">React PDF Viewer</div><span class="text-gray-600">a PDF viewer made for React</span></a></li></ul></div><div class="mt-6"><h3 class="text-xl sm:text-2xl font-semibold mb-2">Follow me <span class="font-light text-gray-600 ml-2">I love building products!</span></h3><ul class="flex"><li class="flex-1"><a href="https://twitter.com/nghuuphuoc" rel="noopener noreferrer" target="_blank" style="text-decoration:none"><div class="font-semibold">Twitter</div><span class="text-gray-600">@nghuuphuoc</span></a></li><li class="flex-1"><a href="https://dev.to/phuocng" rel="noopener noreferrer" target="_blank" style="text-decoration:none"><div class="font-semibold">dev.to</div><span class="text-gray-600">@phuocng</span></a></li><li class="flex-1"><a href="https://github.com/phuoc-ng" rel="noopener noreferrer" target="_blank" style="text-decoration:none"><div class="font-semibold">GitHub</div><span class="text-gray-600">@phuoc-ng</span></a></li></ul></div><div class="pt-4">© 2020 Nguyen Huu Phuoc. All rights reserved</div></div></div></div>
+<script type="text/javascript" async="" src="https://www.google-analytics.com/analytics.js"></script><script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-139616701-7"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-139616701-7');
+</script>
+<script type="text/javascript" src="/html-dom/runtime.84ee7acf870e2850d336.js"></script><script type="text/javascript" src="/html-dom/vendor-styles.29a48c3a7835c7a67150.js"></script><script type="text/javascript" src="/html-dom/vendors.fbef9d73430672c1b7d0.js"></script><script type="text/javascript" src="/html-dom/client.5973423c0edd7eb2ee54.js"></script>
+
+</body></html>

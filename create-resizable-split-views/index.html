@@ -1,0 +1,163 @@
+<html lang="en"><head>
+    <meta charset="utf-8">
+    <title>HTML DOM - Create resizable split views</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="author" content="Nguyen Huu Phuoc">
+	<meta name="description" content="Manage HTML DOM with vanilla JavaScript">
+    
+	<meta name="twitter:site" content="@nghuuphuoc">
+	<meta name="twitter:title" content="Manage HTML DOM with vanilla JavaScript">
+	<meta name="twitter:description" content="Manage HTML DOM with vanilla JavaScript">
+    <meta name="twitter:creator" content="@nghuuphuoc">
+    <meta name="twitter:image" content="https://htmldom.dev/assets/screenshot.png">
+
+	<meta property="og:site_name" content="HTML DOM">
+	<meta property="og:title" content="Manage HTML DOM with vanilla JavaScript">
+	<meta property="og:description" content="Manage HTML DOM with vanilla JavaScript">
+    <meta property="og:url" content="https://htmldom.dev">
+    <meta property="og:image" content="https://htmldom.dev/assets/screenshot.png">
+    
+    <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro&amp;display=swap" rel="stylesheet">
+<link href="/html-dom/vendor-styles.f51019ab61c61bfaec14.css" rel="stylesheet"><link href="/html-dom/client.3072e4ce2bf9ca91f138.css" rel="stylesheet"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://www.googletagmanager.com"><link rel="preconnect" href="https://www.google-analytics.com"><script charset="utf-8" src="/html-dom/posts-add-or-remove-class-from-an-element~posts-allow-to-enter-particular-characters-only~posts-appe~7d800c42.9c372392c5470c46721a.js"></script><script charset="utf-8" src="/html-dom/posts-add-or-remove-class-from-an-element~posts-allow-to-enter-particular-characters-only~posts-appe~98070671.eb632b1036286151ad8b.js"></script><script charset="utf-8" src="/html-dom/posts-allow-to-enter-particular-characters-only~posts-communication-between-an-iframe-and-its-parent~d35237b2.d6e2c58f381bcc69e41d.js"></script><script charset="utf-8" src="/html-dom/posts-create-resizable-split-views.07721345759e762c0125.js"></script><meta name="description" content="Create resizable split views" data-react-helmet="true"><meta name="keywords" content="
+            addEventListener, data attribute, getBoundingClientRect, mousedown event, mousemove event,
+            mouseup event, next sibling, nextElementSibling, previous sibling, previousElementSibling,
+            set css style, split view
+        " data-react-helmet="true"><link rel="preconnect" href="https://fonts.gstatic.com"></head>
+<body class="font-sans w-full">
+    <div id="root" class="flex flex-col min-h-full"><div class="flex-1 px-2 lg:px-0"><div class="ml-auto mr-auto max-w-3xl mb-8"><div class="flex items-center justify-between py-8"><a class="bg-black p-1 rounded text-2xl sm:text-3xl font-light text-white" href="/html-dom/">&lt;/dom&gt;</a><div class="w-2/3 sm:w-1/2"><div class="w-full relative"><div class="border-b border-gray-400"><input class="border-none w-full p-2 flex-1" placeholder="Filter" value=""></div><button class="absolute border-none p-2 right-0 top-0"><svg viewBox="0 0 24 24" style="fill:none;height:24px;stroke:rgba(0,0,0,.4);stroke-linecap:round;stroke-linejoin:round;stroke-width:1;width:24px"><path d="M10.5,0.5c5.523,0,10,4.477,10,10s-4.477,10-10,10s-10-4.477-10-10S4.977,0.5,10.5,0.5z M23.5,23.5 l-5.929-5.929"></path></svg></button></div></div></div><div class="mt-32 text-center"><span class="bg-black text-white text-3xl px-3 py-2 rounded">20/95</span></div><h1 class="font-bold mt-4 mb-4 text-center text-3xl lg:text-4xl px-1">Create resizable split views</h1><div class="mb-12 text-center"><a class="text-2xl bg-gray-400 px-4 py-2" href="https://github.com/phuoc-ng/html-dom/blob/master/client/posts/create-resizable-split-views/index.tsx" rel="noopener noreferrer" target="_blank" style="text-decoration:none">Edit this page</a></div><div class="mb-4"><p class="mb-2">In this post, we'll add an element to resize children of a given element.
+The original element could be organized as below:</p><pre class="hljs mb-8"><code class="html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">"display: flex"</span>&gt;</span>
+    <span class="hljs-comment">&lt;!-- Left element --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>Left<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- The resizer --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"resizer"</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"dragMe"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- Right element --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>Right<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre><p class="mb-2">In order to place the left, resizer and right elements in the same row, we add the <code>display: flex</code> style to the parent.</p><h2 class="text-2xl sm:text-3xl mb-4">Update the width of left side when dragging the resizer element</h2><p class="mb-2">It's recommended to look at this <a class="underline" href="/html-dom/make-a-draggable-element">post</a> to see how we can make an element draggable.</p><p class="mb-2">In our case, the resizer can be dragged horizontally. First, we have to store the mouse position and the left side's width when user starts clicking the resizer:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-comment">// Query the element</span>
+<span class="hljs-keyword">const</span> resizer = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'dragMe'</span>);
+<span class="hljs-keyword">const</span> leftSide = resizer.previousElementSibling;
+<span class="hljs-keyword">const</span> rightSide = resizer.nextElementSibling;
+
+<span class="hljs-comment">// The current position of mouse</span>
+<span class="hljs-keyword">let</span> x = <span class="hljs-number">0</span>;
+<span class="hljs-keyword">let</span> y = <span class="hljs-number">0</span>;
+
+<span class="hljs-comment">// Width of left side</span>
+<span class="hljs-keyword">let</span> leftWidth = <span class="hljs-number">0</span>;
+
+<span class="hljs-comment">// Handle the mousedown event</span>
+<span class="hljs-comment">// that's triggered when user drags the resizer</span>
+<span class="hljs-keyword">const</span> mouseDownHandler = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>) </span>{
+    <span class="hljs-comment">// Get the current mouse position</span>
+    x = e.clientX;
+    y = e.clientY;
+    leftWidth = leftSide.getBoundingClientRect().width;
+
+    <span class="hljs-comment">// Attach the listeners to `document`</span>
+    <span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">'mousemove'</span>, mouseMoveHandler);
+    <span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">'mouseup'</span>, mouseUpHandler);
+};
+
+<span class="hljs-comment">// Attach the handler</span>
+resizer.addEventListener(<span class="hljs-string">'mousedown'</span>, mouseDownHandler);</code></pre><p class="mb-2">Looking at the structure of our markup, the left and right side are previous and next sibling of resizer.
+They can be <a class="underline" href="/html-dom/get-siblings-of-an-element">retrieved</a> as you see above:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-keyword">const</span> leftSide = resizer.previousElementSibling;
+<span class="hljs-keyword">const</span> rightSide = resizer.nextElementSibling;</code></pre><p class="mb-2">Next, when user moves the mouse around, we determine how far the mouse has been moved and then update the width for the left side:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-keyword">const</span> mouseMoveHandler = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>) </span>{
+    <span class="hljs-comment">// How far the mouse has been moved</span>
+    <span class="hljs-keyword">const</span> dx = e.clientX - x;
+    <span class="hljs-keyword">const</span> dy = e.clientY - y;
+
+    <span class="hljs-keyword">const</span> newLeftWidth = (leftWidth + dx) * <span class="hljs-number">100</span> / resizer.parentNode.getBoundingClientRect().width;
+    leftSide.style.width = <span class="hljs-string">`<span class="hljs-subst">${newLeftWidth}</span>%`</span>;
+};</code></pre><p class="mb-2">There're two important things that I would like to point out here:</p><ul class="mb-8 ml-4 list-disc"><li>The width of left side is set based on the number of percentages of the parent's width. It keeps the ratio of left and side widths,
+and makes two sides look good when user resizes the browser.</li><li>It's not necessary to update the width of right side if we always force it to take the remaining width:</li></ul><pre class="hljs mb-8"><code class="html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">"display: flex"</span>&gt;</span>
+    <span class="hljs-comment">&lt;!-- Left element --&gt;</span>
+    ...
+
+    <span class="hljs-comment">&lt;!-- The resizer --&gt;</span>
+    ...
+
+    <span class="hljs-comment">&lt;!-- Right element --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">"flex: 1 1 0%;"</span>&gt;</span>Right<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre><h2 class="text-2xl sm:text-3xl mb-4">Fix the flickering issue</h2><p class="mb-2">When user moves the resizer, we should update its cursor:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-keyword">const</span> mouseMoveHandler = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>) </span>{
+    ...
+    resizer.style.cursor = <span class="hljs-string">'col-resize'</span>;
+};</code></pre><p class="mb-2">But it causes another issue. As soon as the user moves the mouse around, we will see the default mouse cursor beause the
+mouse isn't on top of the resizer. User will see the screen flickering because the cursor is changed continuously.</p><p class="mb-2">To fix that, we set the cursor for the entire page:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-keyword">const</span> mouseMoveHandler = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>) </span>{
+    ...
+    document.body.style.cursor = <span class="hljs-string">'col-resize'</span>;
+};</code></pre><p class="mb-2">We also prevent the mouse events and text selection in both sides by <a class="underline" href="/html-dom/set-css-style-for-an-element">setting the values</a>
+for <code>user-select</code> and <code>pointer-events</code>:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-keyword">const</span> mouseMoveHandler = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>) </span>{
+    ...
+    leftSide.style.userSelect = <span class="hljs-string">'none'</span>;
+    leftSide.style.pointerEvents = <span class="hljs-string">'none'</span>;
+
+    rightSide.style.userSelect = <span class="hljs-string">'none'</span>;
+    rightSide.style.pointerEvents = <span class="hljs-string">'none'</span>;
+};</code></pre><p class="mb-2">These styles are removed right after the user stops moving the mouse:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-keyword">const</span> mouseUpHandler = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    resizer.style.removeProperty(<span class="hljs-string">'cursor'</span>);
+    <span class="hljs-built_in">document</span>.body.style.removeProperty(<span class="hljs-string">'cursor'</span>);
+
+    leftSide.style.removeProperty(<span class="hljs-string">'user-select'</span>);
+    leftSide.style.removeProperty(<span class="hljs-string">'pointer-events'</span>);
+
+    rightSide.style.removeProperty(<span class="hljs-string">'user-select'</span>);
+    rightSide.style.removeProperty(<span class="hljs-string">'pointer-events'</span>);
+
+    <span class="hljs-comment">// Remove the handlers of `mousemove` and `mouseup`</span>
+    <span class="hljs-built_in">document</span>.removeEventListener(<span class="hljs-string">'mousemove'</span>, mouseMoveHandler);
+    <span class="hljs-built_in">document</span>.removeEventListener(<span class="hljs-string">'mouseup'</span>, mouseUpHandler);
+};</code></pre><p class="mb-2">Below is the demo that you can play with.</p><div class="my-4"><div class="inline-flex px-2 py-1 bg-gray-400"><div class="mr-2">Demo</div>(<a class="underline" href="https://github.com/phuoc-ng/html-dom/blob/master//demo/create-resizable-split-views/index.html" target="_blank">source</a>)</div><div class="border border-gray-400 relative"><iframe class="border-none w-full" src="/html-dom/demo/create-resizable-split-views/index.html" style="height:384px"></iframe></div></div><h2 class="text-2xl sm:text-3xl mb-4">Support vertical direction</h2><p class="mb-2">It's easy to support splitting the side vertically. Instead of updating the width of left side, now we update the height of the top side:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-keyword">const</span> prevSibling = resizer.previousElementSibling;
+<span class="hljs-keyword">let</span> prevSiblingHeight = <span class="hljs-number">0</span>;
+
+<span class="hljs-keyword">const</span> mouseDownHandler = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>) </span>{
+    <span class="hljs-keyword">const</span> rect = prevSibling.getBoundingClientRect();
+    prevSiblingHeight = rect.height;
+};
+
+<span class="hljs-keyword">const</span> mouseMoveHandler = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>) </span>{
+    <span class="hljs-keyword">const</span> h = (prevSiblingHeight + dy) * <span class="hljs-number">100</span> / resizer.parentNode.getBoundingClientRect().height;
+    prevSibling.style.height = <span class="hljs-string">`<span class="hljs-subst">${h}</span>%`</span>;
+};</code></pre><p class="mb-2">We also change the cursor when user moves the resizer element:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-keyword">const</span> mouseMoveHandler = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>) </span>{
+    ...
+    resizer.style.cursor = <span class="hljs-string">'row-resize'</span>;
+    <span class="hljs-built_in">document</span>.body.style.cursor = <span class="hljs-string">'row-resize'</span>;
+};</code></pre><h2 class="text-2xl sm:text-3xl mb-4">Support both directions</h2><p class="mb-2">Let's say that the right side wants to be split into two resizable elements. </p><p class="mb-2">We have two resizer elements currently. To indicate the splitting direction for each resizer, we add a custom attribute <code>data-direction</code>:</p><pre class="hljs mb-8"><code class="html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">"display: flex"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>Left<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"resizer"</span> <span class="hljs-attr">data-direction</span>=<span class="hljs-string">"horizontal"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- The right side --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">"display: flex; flex: 1 1 0%; flex-direction: column"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>Top<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"resizer"</span> <span class="hljs-attr">data-direction</span>=<span class="hljs-string">"vertical"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">style</span>=<span class="hljs-string">"flex: 1 1 0%"</span>&gt;</span>Bottom<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre><p class="mb-2">Later, we can <a class="underline" href="/html-dom/get-set-and-remove-data-attributes">retrieve the attribute</a> from the resizer element:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-keyword">const</span> direction = resizer.getAttribute(<span class="hljs-string">'data-direction'</span>) || <span class="hljs-string">'horizontal'</span>;</code></pre><p class="mb-2">The logic of setting the width or height of previous sibling depends on the direction:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-keyword">const</span> mouseMoveHandler = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>) </span>{
+    <span class="hljs-keyword">switch</span> (direction) {
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'vertical'</span>:
+            <span class="hljs-keyword">const</span> h = (prevSiblingHeight + dy) * <span class="hljs-number">100</span> / resizer.parentNode.getBoundingClientRect().height;
+            prevSibling.style.height = <span class="hljs-string">`<span class="hljs-subst">${h}</span>%`</span>;
+            <span class="hljs-keyword">break</span>;
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'horizontal'</span>:
+        <span class="hljs-keyword">default</span>:
+            <span class="hljs-keyword">const</span> w = (prevSiblingWidth + dx) * <span class="hljs-number">100</span> / resizer.parentNode.getBoundingClientRect().width;
+            prevSibling.style.width = <span class="hljs-string">`<span class="hljs-subst">${w}</span>%`</span>;
+            <span class="hljs-keyword">break</span>;
+    }
+
+    <span class="hljs-keyword">const</span> cursor = direction === <span class="hljs-string">'horizontal'</span> ? <span class="hljs-string">'col-resize'</span> : <span class="hljs-string">'row-resize'</span>;
+    resizer.style.cursor = cursor;
+    <span class="hljs-built_in">document</span>.body.style.cursor = cursor;
+
+    ...
+};</code></pre><blockquote class="border-l-4 sm:border-l-8 pl-2 sm:pl-4"><h2 class="text-2xl sm:text-3xl mb-4">Tip</h2><p class="mb-2">Using custom <code>data-</code> attribute is a good way to manage variables associated with the element.</p></blockquote><p class="mb-2">Enjoy the demo!</p><div class="my-4"><div class="inline-flex px-2 py-1 bg-gray-400"><div class="mr-2">Demo</div>(<a class="underline" href="https://github.com/phuoc-ng/html-dom/blob/master//demo/create-resizable-split-views/direction.html" target="_blank">source</a>)</div><div class="border border-gray-400 relative"><iframe class="border-none w-full" src="/html-dom/demo/create-resizable-split-views/direction.html" style="height:640px"></iframe></div></div><h2 class="text-2xl sm:text-3xl mb-4 mt-8">Might be useful</h2><ul><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/attach-or-detach-an-event-handler"><span>Attach or detach an event handler</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/get-set-and-remove-data-attributes"><span>Get set and remove data attributes</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/get-siblings-of-an-element"><span>Get siblings of an element</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/loop-over-a-nodelist"><span>Loop over a nodelist</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/make-a-draggable-element"><span>Make a draggable element</span><span class="p-1 text-white rounded bg-red-600">advanced</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/set-css-style-for-an-element"><span>Set css style for an element</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li></ul></div><div class="mb-2"><a class="text-xl sm:text-2xl" title="Create one time event handler" href="/html-dom/create-one-time-event-handler">← Create one time event handler</a></div><div class="mb-2 text-right"><a class="text-xl sm:text-2xl" title="Detect clicks outside of an element" href="/html-dom/detect-clicks-outside-of-an-element">Detect clicks outside of an element →</a></div></div></div><div class="border-t pt-6 pb-16 border-gray-400"><div class="ml-auto mr-auto max-w-3xl px-2 lg:px-0"><div class="text-center mb-8"><div class="mb-4">Hit the Subscribe button for the latest news on my tools. No spam. Ever!</div><form action="https://csslayout.us4.list-manage.com/subscribe/post?u=77d0bf6497a2cdbb36f08587c&amp;id=e8a912009a" method="post" name="mc-embedded-subscribe-form" target="_blank" novalidate=""><input class="border border-gray-400 p-2 w-56 sm:w-64" type="email" name="EMAIL" placeholder="Email address" required=""><div aria-hidden="true" style="left:-5000px;position:absolute"><input type="text" name="b_77d0bf6497a2cdbb36f08587c_e8a912009a" tabindex="-1"></div><button type="submit" name="subscribe" class="bg-blue-600 border border-blue-600 px-4 py-2 text-white">Subscribe</button></form></div><div><h3 class="text-xl sm:text-2xl font-semibold mb-2">Products</h3><ul class="flex flex-wrap -ml-1 -mr-1"><li class="w-1/2 sm:w-1/3 px-1 mb-6"><a href="https://blur.page" rel="noopener noreferrer" target="_blank" title="BlurPage - a browser extension to hide sensitive element on page" style="text-decoration:none"><div class="font-semibold">Blur Page</div><span class="text-gray-600">a browser extension to hide sensitive element on page</span></a></li><li class="w-1/2 sm:w-1/3 px-1 mb-6"><a href="https://csslayout.io" rel="noopener noreferrer" target="_blank" title="CSS Layout - a collection of popular layouts and patterns made with CSS" style="text-decoration:none"><div class="font-semibold">CSS Layout</div><span class="text-gray-600">a collection of popular layouts and patterns made with CSS</span></a></li><li class="w-1/2 sm:w-1/3 px-1 mb-6"><a href="https://fakenumbers.io" rel="noopener noreferrer" target="_blank" title="Fake Numbers - a JavaScript library to fake a number" style="text-decoration:none"><div class="font-semibold">Fake Numbers</div><span class="text-gray-600">a JavaScript library to fake a number</span></a></li><li class="w-1/2 sm:w-1/3 px-1 mb-6"><a href="https://formvalidation.io" rel="noopener noreferrer" target="_blank" title="FormValidation - the best validation library for JavaScript" style="text-decoration:none"><div class="font-semibold">Form Validation</div><span class="text-gray-600">the best validation library for JavaScript</span></a></li><li class="w-1/2 sm:w-1/3 px-1 mb-6"><a href="https://htmldom.dev" rel="noopener noreferrer" target="_blank" title="HTML DOM - Common tasks of managing HTML DOM with native API" style="text-decoration:none"><div class="font-semibold">HTML DOM</div><span class="text-gray-600">common tasks of managing HTML DOM with vanilla JavaScript</span></a></li><li class="w-1/2 sm:w-1/3 px-1 mb-6"><a href="https://react-pdf-viewer.dev" rel="noopener noreferrer" target="_blank" title="React PDF Viewer - a PDF viewer made for React" style="text-decoration:none"><div class="font-semibold">React PDF Viewer</div><span class="text-gray-600">a PDF viewer made for React</span></a></li></ul></div><div class="mt-6"><h3 class="text-xl sm:text-2xl font-semibold mb-2">Follow me <span class="font-light text-gray-600 ml-2">I love building products!</span></h3><ul class="flex"><li class="flex-1"><a href="https://twitter.com/nghuuphuoc" rel="noopener noreferrer" target="_blank" style="text-decoration:none"><div class="font-semibold">Twitter</div><span class="text-gray-600">@nghuuphuoc</span></a></li><li class="flex-1"><a href="https://dev.to/phuocng" rel="noopener noreferrer" target="_blank" style="text-decoration:none"><div class="font-semibold">dev.to</div><span class="text-gray-600">@phuocng</span></a></li><li class="flex-1"><a href="https://github.com/phuoc-ng" rel="noopener noreferrer" target="_blank" style="text-decoration:none"><div class="font-semibold">GitHub</div><span class="text-gray-600">@phuoc-ng</span></a></li></ul></div><div class="pt-4">© 2020 Nguyen Huu Phuoc. All rights reserved</div></div></div></div>
+<script type="text/javascript" async="" src="https://www.google-analytics.com/analytics.js"></script><script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-139616701-7"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-139616701-7');
+</script>
+<script type="text/javascript" src="/html-dom/runtime.84ee7acf870e2850d336.js"></script><script type="text/javascript" src="/html-dom/vendor-styles.29a48c3a7835c7a67150.js"></script><script type="text/javascript" src="/html-dom/vendors.fbef9d73430672c1b7d0.js"></script><script type="text/javascript" src="/html-dom/client.5973423c0edd7eb2ee54.js"></script>
+
+</body></html>

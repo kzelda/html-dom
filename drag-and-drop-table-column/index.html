@@ -1,0 +1,202 @@
+<html lang="en"><head>
+    <meta charset="utf-8">
+    <title>HTML DOM - Drag and drop table column</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="author" content="Nguyen Huu Phuoc">
+	<meta name="description" content="Manage HTML DOM with vanilla JavaScript">
+    
+	<meta name="twitter:site" content="@nghuuphuoc">
+	<meta name="twitter:title" content="Manage HTML DOM with vanilla JavaScript">
+	<meta name="twitter:description" content="Manage HTML DOM with vanilla JavaScript">
+    <meta name="twitter:creator" content="@nghuuphuoc">
+    <meta name="twitter:image" content="https://htmldom.dev/assets/screenshot.png">
+
+	<meta property="og:site_name" content="HTML DOM">
+	<meta property="og:title" content="Manage HTML DOM with vanilla JavaScript">
+	<meta property="og:description" content="Manage HTML DOM with vanilla JavaScript">
+    <meta property="og:url" content="https://htmldom.dev">
+    <meta property="og:image" content="https://htmldom.dev/assets/screenshot.png">
+    
+    <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro&amp;display=swap" rel="stylesheet">
+<link href="/html-dom/vendor-styles.f51019ab61c61bfaec14.css" rel="stylesheet"><link href="/html-dom/client.3072e4ce2bf9ca91f138.css" rel="stylesheet"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://www.googletagmanager.com"><link rel="preconnect" href="https://www.google-analytics.com"><script charset="utf-8" src="/html-dom/posts-add-or-remove-class-from-an-element~posts-allow-to-enter-particular-characters-only~posts-appe~7d800c42.9c372392c5470c46721a.js"></script><script charset="utf-8" src="/html-dom/posts-add-or-remove-class-from-an-element~posts-allow-to-enter-particular-characters-only~posts-appe~98070671.eb632b1036286151ad8b.js"></script><script charset="utf-8" src="/html-dom/posts-allow-to-enter-particular-characters-only~posts-communication-between-an-iframe-and-its-parent~d35237b2.d6e2c58f381bcc69e41d.js"></script><script charset="utf-8" src="/html-dom/posts-drag-and-drop-table-column.1715a81f9d673b23c02a.js"></script><meta name="description" content="Drag and drop table column" data-react-helmet="true"><meta name="keywords" content="
+            addEventListener, drag drop list, drag drop table row, getBoundingClientRect, insert node before,
+            insertBefore, mousedown event, mousemove event, mouseup event, next sibling,
+            nextElementSibling, previous sibling, previousElementSibling, sortable list, swap nodes
+        " data-react-helmet="true"><link rel="preconnect" href="https://fonts.gstatic.com"></head>
+<body class="font-sans w-full">
+    <div id="root" class="flex flex-col min-h-full"><div class="flex-1 px-2 lg:px-0"><div class="ml-auto mr-auto max-w-3xl mb-8"><div class="flex items-center justify-between py-8"><a class="bg-black p-1 rounded text-2xl sm:text-3xl font-light text-white" href="/html-dom/">&lt;/dom&gt;</a><div class="w-2/3 sm:w-1/2"><div class="w-full relative"><div class="border-b border-gray-400"><input class="border-none w-full p-2 flex-1" placeholder="Filter" value=""></div><button class="absolute border-none p-2 right-0 top-0"><svg viewBox="0 0 24 24" style="fill:none;height:24px;stroke:rgba(0,0,0,.4);stroke-linecap:round;stroke-linejoin:round;stroke-width:1;width:24px"><path d="M10.5,0.5c5.523,0,10,4.477,10,10s-4.477,10-10,10s-10-4.477-10-10S4.977,0.5,10.5,0.5z M23.5,23.5 l-5.929-5.929"></path></svg></button></div></div></div><div class="mt-32 text-center"><span class="bg-black text-white text-3xl px-3 py-2 rounded">29/95</span></div><h1 class="font-bold mt-4 mb-4 text-center text-3xl lg:text-4xl px-1">Drag and drop table column</h1><div class="mb-12 text-center"><a class="text-2xl bg-gray-400 px-4 py-2" href="https://github.com/phuoc-ng/html-dom/blob/master/client/posts/drag-and-drop-table-column/index.tsx" rel="noopener noreferrer" target="_blank" style="text-decoration:none">Edit this page</a></div><div class="mb-4"><p class="mb-2">Before taking a look at this example, it's recommended to visit this <a class="underline" href="/html-dom/drag-and-drop-element-in-a-list">post</a> to know
+how we can drag and drop element in a list.</p><p class="mb-2">The same technique can be applied to the table columns. The basic idea is</p><ul class="mb-8 ml-4 list-disc"><li>When user starts moving a table column, we create a list of items. Each item is cloned from each column of table.</li><li>We show the list at the same position as table, and hide the table.</li><li>At this step, moving column around is actually moving the list item.</li><li>When user drags an item, we determine the index of target item within the list. And swap the columns associated with the dragging and end indexes.</li></ul><p class="mb-2">Let's get started with the basic markup of table:</p><pre class="hljs mb-8"><code class="html"><span class="hljs-tag">&lt;<span class="hljs-name">table</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"table"</span>&gt;</span>
+    ...
+<span class="hljs-tag">&lt;/<span class="hljs-name">table</span>&gt;</span></code></pre><h2 class="text-2xl sm:text-3xl mb-4">Basic setup</h2><p class="mb-2">As mentioned in the <a class="underline" href="/html-dom/drag-and-drop-element-in-a-list">Drag and drop element in a list</a> example, we need handle three events:</p><ul class="mb-8 ml-4 list-disc"><li><code>mousedown</code> for the all header cells, so user can click and drag the first cell in each column</li><li><code>mousemove</code> for <code>document</code>: This event triggers when user moves the column around, and we will create and insert a placeholder column
+depending on the direction (left or right)</li><li><code>mouseup</code> for <code>document</code>: This event occurs when user drags the column.</li></ul><p class="mb-2">Here is the skeleton of these event handlers:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-comment">// Query the table</span>
+<span class="hljs-keyword">const</span> table = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'table'</span>);
+
+<span class="hljs-keyword">const</span> mouseDownHandler = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>) </span>{
+    ...
+
+    <span class="hljs-comment">// Attach the listeners to `document`</span>
+    <span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">'mousemove'</span>, mouseMoveHandler);
+    <span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">'mouseup'</span>, mouseUpHandler);
+};
+
+<span class="hljs-keyword">const</span> mouseMoveHandler = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>) </span>{
+    ...
+};
+
+<span class="hljs-keyword">const</span> mouseUpHandler = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    ...
+    <span class="hljs-comment">// Remove the handlers of `mousemove` and `mouseup`</span>
+    <span class="hljs-built_in">document</span>.removeEventListener(<span class="hljs-string">'mousemove'</span>, mouseMoveHandler);
+    <span class="hljs-built_in">document</span>.removeEventListener(<span class="hljs-string">'mouseup'</span>, mouseUpHandler);
+};
+
+<span class="hljs-comment">// Query all header cells</span>
+table.querySelectorAll(<span class="hljs-string">'th'</span>).forEach(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">headerCell</span>) </span>{
+    <span class="hljs-comment">// Attach event handler</span>
+    headerCell.addEventListener(<span class="hljs-string">'mousedown'</span>, mouseDownHandler);
+});</code></pre><h2 class="text-2xl sm:text-3xl mb-4">Clone the table when user is moving a column</h2><p class="mb-2">Since this task is performed once, we need a flag to track if it's executed:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-keyword">let</span> isDraggingStarted = <span class="hljs-literal">false</span>;
+
+<span class="hljs-keyword">const</span> mouseMoveHandler = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>) </span>{
+    <span class="hljs-keyword">if</span> (!isDraggingStarted) {
+        isDraggingStarted = <span class="hljs-literal">true</span>;
+
+        cloneTable();
+    }
+    ...
+};</code></pre><p class="mb-2"><code>cloneTable</code> creates an element that has the same position as the table, and is shown right before the table:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-keyword">let</span> list;
+
+<span class="hljs-keyword">const</span> cloneTable = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-comment">// Get the bounding rectangle of table</span>
+    <span class="hljs-keyword">const</span> rect = table.getBoundingClientRect();
+
+    <span class="hljs-comment">// Create new element</span>
+    list = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>);
+    
+    <span class="hljs-comment">// Set the same position as table</span>
+    list.style.position = <span class="hljs-string">'absolute'</span>;
+    list.style.left = <span class="hljs-string">`<span class="hljs-subst">${rect.left}</span>px`</span>;
+    list.style.top = <span class="hljs-string">`<span class="hljs-subst">${rect.top}</span>px`</span>;
+
+    <span class="hljs-comment">// Insert it before the table</span>
+    table.parentNode.insertBefore(list, table);
+
+    <span class="hljs-comment">// Hide the table</span>
+    table.style.visibility = <span class="hljs-string">'hidden'</span>;
+};</code></pre><p class="mb-2">Imagine that <code>list</code> consists of items which are cloned from the table columns:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-keyword">const</span> cloneTable = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    ...
+
+    <span class="hljs-comment">// Get all cells</span>
+    <span class="hljs-keyword">const</span> originalCells = [].slice.call(table.querySelectorAll(<span class="hljs-string">'tbody td'</span>));
+
+    <span class="hljs-keyword">const</span> originalHeaderCells = [].slice.call(table.querySelectorAll(<span class="hljs-string">'th'</span>));
+    <span class="hljs-keyword">const</span> numColumns = originalHeaderCells.length;
+
+    <span class="hljs-comment">// Loop through the header cells</span>
+    originalHeaderCells.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">headerCell, headerIndex</span>) </span>{
+        <span class="hljs-keyword">const</span> width = <span class="hljs-built_in">parseInt</span>(<span class="hljs-built_in">window</span>.getComputedStyle(headerCell).width);
+
+        <span class="hljs-comment">// Create a new table from given row</span>
+        <span class="hljs-keyword">const</span> item = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'div'</span>);
+        item.classList.add(<span class="hljs-string">'draggable'</span>);
+
+        <span class="hljs-keyword">const</span> newTable = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'table'</span>);
+
+        <span class="hljs-comment">// Header</span>
+        <span class="hljs-keyword">const</span> th = headerCell.cloneNode(<span class="hljs-literal">true</span>);
+        <span class="hljs-keyword">let</span> newRow = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'tr'</span>);
+        newRow.appendChild(th);
+        newTable.appendChild(newRow);
+
+        <span class="hljs-keyword">const</span> cells = originalCells.filter(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">c, idx</span>) </span>{
+            <span class="hljs-keyword">return</span> (idx - headerIndex) % numColumns === <span class="hljs-number">0</span>;
+        });
+        cells.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">cell</span>) </span>{
+            <span class="hljs-keyword">const</span> newCell = cell.cloneNode(<span class="hljs-literal">true</span>);
+            newRow = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">'tr'</span>);
+            newRow.appendChild(newCell);
+            newTable.appendChild(newRow);
+        });
+
+        item.appendChild(newTable);
+        list.appendChild(item);
+    });
+};</code></pre><p class="mb-2">After this step, we have the following <code>list</code>:</p><pre class="hljs mb-8"><code class="html"><span class="hljs-comment">&lt;!-- The list --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-comment">&lt;!-- First item --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">table</span>&gt;</span>
+            <span class="hljs-comment">&lt;!-- The first column of original table --&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">tr</span>&gt;</span>...<span class="hljs-tag">&lt;/<span class="hljs-name">tr</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">tr</span>&gt;</span>...<span class="hljs-tag">&lt;/<span class="hljs-name">tr</span>&gt;</span>
+            ...
+        <span class="hljs-tag">&lt;/<span class="hljs-name">table</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- Second item --&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">table</span>&gt;</span>
+            <span class="hljs-comment">&lt;!-- The second column of original table --&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">tr</span>&gt;</span>...<span class="hljs-tag">&lt;/<span class="hljs-name">tr</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">tr</span>&gt;</span>...<span class="hljs-tag">&lt;/<span class="hljs-name">tr</span>&gt;</span>
+            ...
+        <span class="hljs-tag">&lt;/<span class="hljs-name">table</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+    <span class="hljs-comment">&lt;!-- ... --&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+<span class="hljs-comment">&lt;!-- The original table --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">table</span>&gt;</span>
+    ...
+<span class="hljs-tag">&lt;/<span class="hljs-name">table</span>&gt;</span></code></pre><p class="mb-2">It's worth noting that when cloning cells in each item, we have to set the cell width same as the original cell.
+So the item looks like the original column completely:</p><pre class="hljs mb-8"><code class="javascript">originalHeaderCells.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">headerCell, headerIndex</span>) </span>{
+    <span class="hljs-comment">// Get the width of original cell</span>
+    <span class="hljs-keyword">const</span> width = <span class="hljs-built_in">parseInt</span>(<span class="hljs-built_in">window</span>.getComputedStyle(headerCell).width);
+
+    newTable.style.width = <span class="hljs-string">`<span class="hljs-subst">${width}</span>px`</span>;
+
+    cells.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">cell</span>) </span>{
+        <span class="hljs-keyword">const</span> newCell = cell.cloneNode(<span class="hljs-literal">true</span>);
+        newCell.style.width = <span class="hljs-string">`<span class="hljs-subst">${width}</span>px`</span>;
+        ...
+    });
+});</code></pre><h2 class="text-2xl sm:text-3xl mb-4">Determine the indexes of dragging and target columns</h2><pre class="hljs mb-8"><code class="javascript"><span class="hljs-keyword">let</span> draggingEle;        <span class="hljs-comment">// The dragging element</span>
+<span class="hljs-keyword">let</span> draggingRowIndex;   <span class="hljs-comment">// The index of dragging column</span>
+
+<span class="hljs-keyword">const</span> mouseDownHandler = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>) </span>{
+    <span class="hljs-comment">// Get the index of dragging column</span>
+    draggingColumnIndex = [].slice.call(table.querySelectorAll(<span class="hljs-string">'th'</span>)).indexOf(e.target);
+};
+
+<span class="hljs-keyword">const</span> mouseMoveHandler = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>) </span>{
+    <span class="hljs-keyword">if</span> (!isDraggingStarted) {
+        cloneTable();
+
+        <span class="hljs-comment">// Query the dragging element</span>
+        draggingEle = [].slice.call(list.children)[draggingColumnIndex];
+    }
+};
+
+<span class="hljs-keyword">const</span> mouseUpHandler = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-comment">// Get the end index</span>
+    <span class="hljs-keyword">const</span> endColumnIndex = [].slice.call(list.children).indexOf(draggingEle);
+};</code></pre><p class="mb-2">As we have <code>draggingColumnIndex</code> and <code>endColumnIndex</code>, it's now easy to check if user drops to the left or right of table.
+And we can decide how to move the target column <a class="underline" href="/html-dom/insert-an-element-after-or-before-other-element">before or after the dragging column</a>:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-keyword">const</span> mouseUpHandler = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-comment">// Move the dragged column to `endColumnIndex`</span>
+    table.querySelectorAll(<span class="hljs-string">'tr'</span>).forEach(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">row</span>) </span>{
+        <span class="hljs-keyword">const</span> cells = [].slice.call(row.querySelectorAll(<span class="hljs-string">'th, td'</span>));
+        draggingColumnIndex &gt; endColumnIndex
+            ? cells[endColumnIndex].parentNode.insertBefore(cells[draggingColumnIndex], cells[endColumnIndex])
+            : cells[endColumnIndex].parentNode.insertBefore(cells[draggingColumnIndex], cells[endColumnIndex].nextSibling);
+    });
+};</code></pre><p class="mb-2">Following is the final demo. Try to drag and drop the first cell of any column.</p><div class="my-4"><div class="inline-flex px-2 py-1 bg-gray-400"><div class="mr-2">Demo</div>(<a class="underline" href="https://github.com/phuoc-ng/html-dom/blob/master//demo/drag-and-drop-table-column/index.html" target="_blank">source</a>)</div><div class="border border-gray-400 relative"><iframe class="border-none w-full" src="/html-dom/demo/drag-and-drop-table-column/index.html" style="height:652px"></iframe></div></div><h2 class="text-2xl sm:text-3xl mb-4 mt-8">Might be useful</h2><ul><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/add-or-remove-class-from-an-element"><span>Add or remove class from an element</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/attach-or-detach-an-event-handler"><span>Attach or detach an event handler</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/calculate-the-mouse-position-relative-to-an-element"><span>Calculate the mouse position relative to an element</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/clone-an-element"><span>Clone an element</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/create-an-element"><span>Create an element</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/drag-and-drop-element-in-a-list"><span>Drag and drop element in a list</span><span class="p-1 text-white rounded bg-red-600">advanced</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/get-siblings-of-an-element"><span>Get siblings of an element</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/insert-an-element-after-or-before-other-element"><span>Insert an element after or before other element</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/loop-over-a-nodelist"><span>Loop over a nodelist</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/make-a-draggable-element"><span>Make a draggable element</span><span class="p-1 text-white rounded bg-red-600">advanced</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/remove-an-element"><span>Remove an element</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/select-an-element-or-list-of-elements"><span>Select an element or list of elements</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/set-css-style-for-an-element"><span>Set css style for an element</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li></ul></div><div class="mb-2"><a class="text-xl sm:text-2xl" title="Drag and drop element in a list" href="/html-dom/drag-and-drop-element-in-a-list">← Drag and drop element in a list</a></div><div class="mb-2 text-right"><a class="text-xl sm:text-2xl" title="Drag and drop table row" href="/html-dom/drag-and-drop-table-row">Drag and drop table row →</a></div></div></div><div class="border-t pt-6 pb-16 border-gray-400"><div class="ml-auto mr-auto max-w-3xl px-2 lg:px-0"><div class="text-center mb-8"><div class="mb-4">Hit the Subscribe button for the latest news on my tools. No spam. Ever!</div><form action="https://csslayout.us4.list-manage.com/subscribe/post?u=77d0bf6497a2cdbb36f08587c&amp;id=e8a912009a" method="post" name="mc-embedded-subscribe-form" target="_blank" novalidate=""><input class="border border-gray-400 p-2 w-56 sm:w-64" type="email" name="EMAIL" placeholder="Email address" required=""><div aria-hidden="true" style="left:-5000px;position:absolute"><input type="text" name="b_77d0bf6497a2cdbb36f08587c_e8a912009a" tabindex="-1"></div><button type="submit" name="subscribe" class="bg-blue-600 border border-blue-600 px-4 py-2 text-white">Subscribe</button></form></div><div><h3 class="text-xl sm:text-2xl font-semibold mb-2">Products</h3><ul class="flex flex-wrap -ml-1 -mr-1"><li class="w-1/2 sm:w-1/3 px-1 mb-6"><a href="https://blur.page" rel="noopener noreferrer" target="_blank" title="BlurPage - a browser extension to hide sensitive element on page" style="text-decoration:none"><div class="font-semibold">Blur Page</div><span class="text-gray-600">a browser extension to hide sensitive element on page</span></a></li><li class="w-1/2 sm:w-1/3 px-1 mb-6"><a href="https://csslayout.io" rel="noopener noreferrer" target="_blank" title="CSS Layout - a collection of popular layouts and patterns made with CSS" style="text-decoration:none"><div class="font-semibold">CSS Layout</div><span class="text-gray-600">a collection of popular layouts and patterns made with CSS</span></a></li><li class="w-1/2 sm:w-1/3 px-1 mb-6"><a href="https://fakenumbers.io" rel="noopener noreferrer" target="_blank" title="Fake Numbers - a JavaScript library to fake a number" style="text-decoration:none"><div class="font-semibold">Fake Numbers</div><span class="text-gray-600">a JavaScript library to fake a number</span></a></li><li class="w-1/2 sm:w-1/3 px-1 mb-6"><a href="https://formvalidation.io" rel="noopener noreferrer" target="_blank" title="FormValidation - the best validation library for JavaScript" style="text-decoration:none"><div class="font-semibold">Form Validation</div><span class="text-gray-600">the best validation library for JavaScript</span></a></li><li class="w-1/2 sm:w-1/3 px-1 mb-6"><a href="https://htmldom.dev" rel="noopener noreferrer" target="_blank" title="HTML DOM - Common tasks of managing HTML DOM with native API" style="text-decoration:none"><div class="font-semibold">HTML DOM</div><span class="text-gray-600">common tasks of managing HTML DOM with vanilla JavaScript</span></a></li><li class="w-1/2 sm:w-1/3 px-1 mb-6"><a href="https://react-pdf-viewer.dev" rel="noopener noreferrer" target="_blank" title="React PDF Viewer - a PDF viewer made for React" style="text-decoration:none"><div class="font-semibold">React PDF Viewer</div><span class="text-gray-600">a PDF viewer made for React</span></a></li></ul></div><div class="mt-6"><h3 class="text-xl sm:text-2xl font-semibold mb-2">Follow me <span class="font-light text-gray-600 ml-2">I love building products!</span></h3><ul class="flex"><li class="flex-1"><a href="https://twitter.com/nghuuphuoc" rel="noopener noreferrer" target="_blank" style="text-decoration:none"><div class="font-semibold">Twitter</div><span class="text-gray-600">@nghuuphuoc</span></a></li><li class="flex-1"><a href="https://dev.to/phuocng" rel="noopener noreferrer" target="_blank" style="text-decoration:none"><div class="font-semibold">dev.to</div><span class="text-gray-600">@phuocng</span></a></li><li class="flex-1"><a href="https://github.com/phuoc-ng" rel="noopener noreferrer" target="_blank" style="text-decoration:none"><div class="font-semibold">GitHub</div><span class="text-gray-600">@phuoc-ng</span></a></li></ul></div><div class="pt-4">© 2020 Nguyen Huu Phuoc. All rights reserved</div></div></div></div>
+<script type="text/javascript" async="" src="https://www.google-analytics.com/analytics.js"></script><script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-139616701-7"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-139616701-7');
+</script>
+<script type="text/javascript" src="/html-dom/runtime.84ee7acf870e2850d336.js"></script><script type="text/javascript" src="/html-dom/vendor-styles.29a48c3a7835c7a67150.js"></script><script type="text/javascript" src="/html-dom/vendors.fbef9d73430672c1b7d0.js"></script><script type="text/javascript" src="/html-dom/client.5973423c0edd7eb2ee54.js"></script>
+
+</body></html>

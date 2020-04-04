@@ -1,0 +1,2 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[12],{"dRr/":function(e,n,a){"use strict";a.r(n);var t=a("q1tI"),s=a.n(t),c=a("Ov9x"),r=a("2G++");n.default=function(){return s.a.createElement(s.a.Fragment,null,s.a.createElement(c.a,{content:"\n~~~ javascript\nele.classList.contains('class-name');\n~~~\n"}),s.a.createElement(r.a,{slugs:["add-or-remove-class-from-an-element"]}))}}}]);
+//# sourceMappingURL=posts-check-if-an-element-has-given-class.05ae97982475673b2cee.js.map

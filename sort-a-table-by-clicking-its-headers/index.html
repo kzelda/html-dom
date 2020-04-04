@@ -1,0 +1,152 @@
+<html lang="en"><head>
+    <meta charset="utf-8">
+    <title>HTML DOM - Sort a table by clicking its headers</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="author" content="Nguyen Huu Phuoc">
+	<meta name="description" content="Manage HTML DOM with vanilla JavaScript">
+    
+	<meta name="twitter:site" content="@nghuuphuoc">
+	<meta name="twitter:title" content="Manage HTML DOM with vanilla JavaScript">
+	<meta name="twitter:description" content="Manage HTML DOM with vanilla JavaScript">
+    <meta name="twitter:creator" content="@nghuuphuoc">
+    <meta name="twitter:image" content="https://htmldom.dev/assets/screenshot.png">
+
+	<meta property="og:site_name" content="HTML DOM">
+	<meta property="og:title" content="Manage HTML DOM with vanilla JavaScript">
+	<meta property="og:description" content="Manage HTML DOM with vanilla JavaScript">
+    <meta property="og:url" content="https://htmldom.dev">
+    <meta property="og:image" content="https://htmldom.dev/assets/screenshot.png">
+    
+    <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro&amp;display=swap" rel="stylesheet">
+<link href="/html-dom/vendor-styles.f51019ab61c61bfaec14.css" rel="stylesheet"><link href="/html-dom/client.3072e4ce2bf9ca91f138.css" rel="stylesheet"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://www.googletagmanager.com"><link rel="preconnect" href="https://www.google-analytics.com"><script charset="utf-8" src="/html-dom/posts-add-or-remove-class-from-an-element~posts-allow-to-enter-particular-characters-only~posts-appe~7d800c42.9c372392c5470c46721a.js"></script><script charset="utf-8" src="/html-dom/posts-add-or-remove-class-from-an-element~posts-allow-to-enter-particular-characters-only~posts-appe~98070671.eb632b1036286151ad8b.js"></script><script charset="utf-8" src="/html-dom/posts-allow-to-enter-particular-characters-only~posts-communication-between-an-iframe-and-its-parent~d35237b2.d6e2c58f381bcc69e41d.js"></script><script charset="utf-8" src="/html-dom/posts-sort-a-table-by-clicking-its-headers.bae0d04f604cbf781fd3.js"></script><meta name="description" content="Sort a table by clicking its headers" data-react-helmet="true"><link rel="preconnect" href="https://fonts.gstatic.com"></head>
+<body class="font-sans w-full">
+    <div id="root" class="flex flex-col min-h-full"><div class="flex-1 px-2 lg:px-0"><div class="ml-auto mr-auto max-w-3xl mb-8"><div class="flex items-center justify-between py-8"><a class="bg-black p-1 rounded text-2xl sm:text-3xl font-light text-white" href="/html-dom/">&lt;/dom&gt;</a><div class="w-2/3 sm:w-1/2"><div class="w-full relative"><div class="border-b border-gray-400"><input class="border-none w-full p-2 flex-1" placeholder="Filter" value=""></div><button class="absolute border-none p-2 right-0 top-0"><svg viewBox="0 0 24 24" style="fill:none;height:24px;stroke:rgba(0,0,0,.4);stroke-linecap:round;stroke-linejoin:round;stroke-width:1;width:24px"><path d="M10.5,0.5c5.523,0,10,4.477,10,10s-4.477,10-10,10s-10-4.477-10-10S4.977,0.5,10.5,0.5z M23.5,23.5 l-5.929-5.929"></path></svg></button></div></div></div><div class="mt-32 text-center"><span class="bg-black text-white text-3xl px-3 py-2 rounded">86/95</span></div><h1 class="font-bold mt-4 mb-4 text-center text-3xl lg:text-4xl px-1">Sort a table by clicking its headers</h1><div class="mb-12 text-center"><a class="text-2xl bg-gray-400 px-4 py-2" href="https://github.com/phuoc-ng/html-dom/blob/master/client/posts/sort-a-table-by-clicking-its-headers/index.tsx" rel="noopener noreferrer" target="_blank" style="text-decoration:none">Edit this page</a></div><div class="mb-4"><p class="mb-2">Assume that we want to sort any column of the following table:</p><pre class="hljs mb-8"><code class="html"><span class="hljs-tag">&lt;<span class="hljs-name">table</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"sortMe"</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"table"</span>&gt;</span>
+    ...
+<span class="hljs-tag">&lt;/<span class="hljs-name">table</span>&gt;</span></code></pre><h2 class="text-2xl sm:text-3xl mb-4">Sort rows</h2><p class="mb-2">First of all, we <a class="underline" href="/html-dom/select-an-element-or-list-of-elements">query</a> all the headers, <a class="underline" href="/html-dom/loop-over-a-nodelist">loop over</a> them
+and <a class="underline" href="/html-dom/attach-or-detach-an-event-handler">attach an event handler</a> for the <code>click</code> event to each of them:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-comment">// Query the table</span>
+<span class="hljs-keyword">const</span> table = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'sortMe'</span>);
+
+<span class="hljs-comment">// Query the headers</span>
+<span class="hljs-keyword">const</span> headers = table.querySelectorAll(<span class="hljs-string">'th'</span>);
+
+<span class="hljs-comment">// Loop over the headers</span>
+[].forEach.call(headers, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">header, index</span>) </span>{
+    header.addEventListener(<span class="hljs-string">'click'</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+        <span class="hljs-comment">// This function will sort the column</span>
+        sortColumn(index);
+    });
+});</code></pre><p class="mb-2">The <code>sortColumn(index)</code> function mentioned above will sort all rows by given column <code>index</code>.</p><p class="mb-2">To do so:</p><ul class="mb-8 ml-4 list-disc"><li>We can use the <code>Array</code>'s <code>sort()</code> method to sort the current rows</li><li>Then, <a class="underline" href="/html-dom/remove-an-element">remove</a> all the current rows</li><li>And <a class="underline" href="/html-dom/append-to-an-element">append</a> the sorted rows</li></ul><pre class="hljs mb-8"><code class="javascript"><span class="hljs-comment">// Query all rows</span>
+<span class="hljs-keyword">const</span> tableBody = table.querySelector(<span class="hljs-string">'tbody'</span>);
+<span class="hljs-keyword">const</span> rows = tableBody.querySelectorAll(<span class="hljs-string">'tr'</span>);
+
+<span class="hljs-keyword">const</span> sortColumn = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">index</span>) </span>{
+    <span class="hljs-comment">// Clone the rows</span>
+    <span class="hljs-keyword">const</span> newRows = <span class="hljs-built_in">Array</span>.from(rows);
+
+    <span class="hljs-comment">// Sort rows by the content of cells</span>
+    newRows.sort(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">rowA, rowB</span>) </span>{
+        <span class="hljs-comment">// Get the content of cells</span>
+        <span class="hljs-keyword">const</span> cellA = rowA.querySelectorAll(<span class="hljs-string">'td'</span>)[index].innerHTML;
+        <span class="hljs-keyword">const</span> cellB = rowB.querySelectorAll(<span class="hljs-string">'td'</span>)[index].innerHTML;
+
+        <span class="hljs-keyword">switch</span> (<span class="hljs-literal">true</span>) {
+            <span class="hljs-keyword">case</span> cellA &gt; cellB: <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+            <span class="hljs-keyword">case</span> cellA &lt; cellB: <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;
+            <span class="hljs-keyword">case</span> cellA === cellB: <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+        }
+    });
+
+    <span class="hljs-comment">// Remove old rows</span>
+    [].forEach.call(rows, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">row</span>) </span>{
+        tableBody.removeChild(row);
+    });
+
+    <span class="hljs-comment">// Append new row</span>
+    newRows.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">newRow</span>) </span>{
+        tableBody.appendChild(newRow);
+    });
+};</code></pre><p class="mb-2">As you see, an array provides a built-in <code>sort</code> method which accepts a function to compare two items.
+In our case, two cells of the column are compared based on its <a class="underline" href="/html-dom/get-or-set-the-html-of-an-element">HTML content</a>:</p><pre class="hljs mb-8"><code class="javascript">newRows.sort(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">rowA, rowB</span>) </span>{
+    <span class="hljs-comment">// Get the content of cells</span>
+    <span class="hljs-keyword">const</span> cellA = rowA.querySelectorAll(<span class="hljs-string">'td'</span>)[index].innerHTML;
+    <span class="hljs-keyword">const</span> cellB = rowB.querySelectorAll(<span class="hljs-string">'td'</span>)[index].innerHTML;
+
+    ...
+});</code></pre><p class="mb-2">It works well with the cells whose content are string, not numbers or another type such as date.
+Going to the next section to see how we can support those cases.</p><h2 class="text-2xl sm:text-3xl mb-4">Support other types</h2><p class="mb-2">We add a custom attribute to each header to indicate the type of its cells:</p><pre class="hljs mb-8"><code class="html"><span class="hljs-tag">&lt;<span class="hljs-name">thead</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">tr</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">th</span> <span class="hljs-attr">data-type</span>=<span class="hljs-string">"number"</span>&gt;</span>No.<span class="hljs-tag">&lt;/<span class="hljs-name">th</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">th</span>&gt;</span>First name<span class="hljs-tag">&lt;/<span class="hljs-name">th</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">th</span>&gt;</span>Last name<span class="hljs-tag">&lt;/<span class="hljs-name">th</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">tr</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">thead</span>&gt;</span></code></pre><p class="mb-2">For example, the <em>No.</em> column would have a <code>data-type="number"</code> attribute. If the attribute is missing, the content types of cells are string.
+We need a function to transform the content of cells from string to another type:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-comment">// Transform the content of given cell in given column</span>
+<span class="hljs-keyword">const</span> transform = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">index, content</span>) </span>{
+    <span class="hljs-comment">// Get the data type of column</span>
+    <span class="hljs-keyword">const</span> type = headers[index].getAttribute(<span class="hljs-string">'data-type'</span>);
+    <span class="hljs-keyword">switch</span> (type) {
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'number'</span>:
+            <span class="hljs-keyword">return</span> <span class="hljs-built_in">parseFloat</span>(content);
+        <span class="hljs-keyword">case</span> <span class="hljs-string">'string'</span>:
+        <span class="hljs-keyword">default</span>:
+            <span class="hljs-keyword">return</span> content;
+    }
+};</code></pre><p class="mb-2">The sample code demonstrates the <code>number</code> and <code>string</code> columns, but you are free to support more types such as date.</p><p class="mb-2">Now we improve the <code>sortColumn</code> function a little bit to support the custom content types. Instead of comparing the raw content,
+we compare the values which are converted based on the content type:</p><pre class="hljs mb-8"><code class="javascript">newRows.sort(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">rowA, rowB</span>) </span>{
+    <span class="hljs-keyword">const</span> cellA = rowA.querySelectorAll(<span class="hljs-string">'td'</span>)[index].innerHTML;
+    <span class="hljs-keyword">const</span> cellB = rowB.querySelectorAll(<span class="hljs-string">'td'</span>)[index].innerHTML;
+
+    <span class="hljs-comment">// Transform the content of cells</span>
+    <span class="hljs-keyword">const</span> a = transform(index, cellA);
+    <span class="hljs-keyword">const</span> b = transform(index, cellB);    
+
+    <span class="hljs-comment">// And compare them</span>
+    <span class="hljs-keyword">switch</span> (<span class="hljs-literal">true</span>) {
+        <span class="hljs-keyword">case</span> a &gt; b: <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;
+        <span class="hljs-keyword">case</span> a &lt; b: <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span>;
+        <span class="hljs-keyword">case</span> a === b: <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+    }
+});</code></pre><h2 class="text-2xl sm:text-3xl mb-4">Support both directions</h2><p class="mb-2">At the moment, clicking a header sorts all the rows. We should reverse the direction if user clicks the header again.
+To do so, we prepare a variable to manage the sorting directions of all headers:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-comment">// Track sort directions</span>
+<span class="hljs-keyword">const</span> directions = <span class="hljs-built_in">Array</span>.from(headers).map(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">header</span>) </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-string">''</span>;
+});</code></pre><p class="mb-2"><code>directions</code> is an array which each item can be either <code>asc</code> or <code>desc</code> indicating the sorting direction in the associate column.</p><p class="mb-2">The <code>sortColumn()</code> function now involves more logics to compare two rows based on the current direction:</p><pre class="hljs mb-8"><code class="javascript"><span class="hljs-keyword">const</span> sortColumn = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">index</span>) </span>{
+    <span class="hljs-comment">// Get the current direction</span>
+    <span class="hljs-keyword">const</span> direction = directions[index] || <span class="hljs-string">'asc'</span>;
+
+    <span class="hljs-comment">// A factor based on the direction</span>
+    <span class="hljs-keyword">const</span> multiplier = (direction === <span class="hljs-string">'asc'</span>) ? <span class="hljs-number">1</span> : <span class="hljs-number">-1</span>;
+
+    ...
+
+    newRows.sort(<span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params">rowA, rowB</span>) </span>{
+        <span class="hljs-keyword">const</span> cellA = rowA.querySelectorAll(<span class="hljs-string">'td'</span>)[index].innerHTML;
+        <span class="hljs-keyword">const</span> cellB = rowB.querySelectorAll(<span class="hljs-string">'td'</span>)[index].innerHTML;
+
+        <span class="hljs-keyword">const</span> a = transform(index, cellA);
+        <span class="hljs-keyword">const</span> b = transform(index, cellB);    
+
+        <span class="hljs-keyword">switch</span> (<span class="hljs-literal">true</span>) {
+            <span class="hljs-keyword">case</span> a &gt; b: <span class="hljs-keyword">return</span> <span class="hljs-number">1</span> * multiplier;
+            <span class="hljs-keyword">case</span> a &lt; b: <span class="hljs-keyword">return</span> <span class="hljs-number">-1</span> * multiplier;
+            <span class="hljs-keyword">case</span> a === b: <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+        }
+    });
+
+    ...
+
+    <span class="hljs-comment">// Reverse the direction</span>
+    directions[index] = direction === <span class="hljs-string">'asc'</span> ? <span class="hljs-string">'desc'</span> : <span class="hljs-string">'asc'</span>;
+
+    ...
+};</code></pre><div class="my-4"><div class="inline-flex px-2 py-1 bg-gray-400"><div class="mr-2">Demo</div>(<a class="underline" href="https://github.com/phuoc-ng/html-dom/blob/master//demo/sort-a-table-by-clicking-its-headers/index.html" target="_blank">source</a>)</div><div class="border border-gray-400 relative"><iframe class="border-none w-full" src="/html-dom/demo/sort-a-table-by-clicking-its-headers/index.html" style="height:451px"></iframe></div></div><h2 class="text-2xl sm:text-3xl mb-4 mt-8">Might be useful</h2><ul><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/append-to-an-element"><span>Append to an element</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/attach-or-detach-an-event-handler"><span>Attach or detach an event handler</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/get-or-set-the-html-of-an-element"><span>Get or set the html of an element</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/get-set-and-remove-data-attributes"><span>Get set and remove data attributes</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/loop-over-a-nodelist"><span>Loop over a nodelist</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/remove-an-element"><span>Remove an element</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li><li class="mb-2"><a class="bg-gray-200 px-2 py-1 flex items-center justify-between" href="/html-dom/select-an-element-or-list-of-elements"><span>Select an element or list of elements</span><span class="p-1 text-white rounded bg-gray-600">basic</span></a></li></ul></div><div class="mb-2"><a class="text-xl sm:text-2xl" title="Show or hide an element" href="/html-dom/show-or-hide-an-element">← Show or hide an element</a></div><div class="mb-2 text-right"><a class="text-xl sm:text-2xl" title="Strip html from a given text" href="/html-dom/strip-html-from-a-given-text">Strip html from a given text →</a></div></div></div><div class="border-t pt-6 pb-16 border-gray-400"><div class="ml-auto mr-auto max-w-3xl px-2 lg:px-0"><div class="text-center mb-8"><div class="mb-4">Hit the Subscribe button for the latest news on my tools. No spam. Ever!</div><form action="https://csslayout.us4.list-manage.com/subscribe/post?u=77d0bf6497a2cdbb36f08587c&amp;id=e8a912009a" method="post" name="mc-embedded-subscribe-form" target="_blank" novalidate=""><input class="border border-gray-400 p-2 w-56 sm:w-64" type="email" name="EMAIL" placeholder="Email address" required=""><div aria-hidden="true" style="left:-5000px;position:absolute"><input type="text" name="b_77d0bf6497a2cdbb36f08587c_e8a912009a" tabindex="-1"></div><button type="submit" name="subscribe" class="bg-blue-600 border border-blue-600 px-4 py-2 text-white">Subscribe</button></form></div><div><h3 class="text-xl sm:text-2xl font-semibold mb-2">Products</h3><ul class="flex flex-wrap -ml-1 -mr-1"><li class="w-1/2 sm:w-1/3 px-1 mb-6"><a href="https://blur.page" rel="noopener noreferrer" target="_blank" title="BlurPage - a browser extension to hide sensitive element on page" style="text-decoration:none"><div class="font-semibold">Blur Page</div><span class="text-gray-600">a browser extension to hide sensitive element on page</span></a></li><li class="w-1/2 sm:w-1/3 px-1 mb-6"><a href="https://csslayout.io" rel="noopener noreferrer" target="_blank" title="CSS Layout - a collection of popular layouts and patterns made with CSS" style="text-decoration:none"><div class="font-semibold">CSS Layout</div><span class="text-gray-600">a collection of popular layouts and patterns made with CSS</span></a></li><li class="w-1/2 sm:w-1/3 px-1 mb-6"><a href="https://fakenumbers.io" rel="noopener noreferrer" target="_blank" title="Fake Numbers - a JavaScript library to fake a number" style="text-decoration:none"><div class="font-semibold">Fake Numbers</div><span class="text-gray-600">a JavaScript library to fake a number</span></a></li><li class="w-1/2 sm:w-1/3 px-1 mb-6"><a href="https://formvalidation.io" rel="noopener noreferrer" target="_blank" title="FormValidation - the best validation library for JavaScript" style="text-decoration:none"><div class="font-semibold">Form Validation</div><span class="text-gray-600">the best validation library for JavaScript</span></a></li><li class="w-1/2 sm:w-1/3 px-1 mb-6"><a href="https://htmldom.dev" rel="noopener noreferrer" target="_blank" title="HTML DOM - Common tasks of managing HTML DOM with native API" style="text-decoration:none"><div class="font-semibold">HTML DOM</div><span class="text-gray-600">common tasks of managing HTML DOM with vanilla JavaScript</span></a></li><li class="w-1/2 sm:w-1/3 px-1 mb-6"><a href="https://react-pdf-viewer.dev" rel="noopener noreferrer" target="_blank" title="React PDF Viewer - a PDF viewer made for React" style="text-decoration:none"><div class="font-semibold">React PDF Viewer</div><span class="text-gray-600">a PDF viewer made for React</span></a></li></ul></div><div class="mt-6"><h3 class="text-xl sm:text-2xl font-semibold mb-2">Follow me <span class="font-light text-gray-600 ml-2">I love building products!</span></h3><ul class="flex"><li class="flex-1"><a href="https://twitter.com/nghuuphuoc" rel="noopener noreferrer" target="_blank" style="text-decoration:none"><div class="font-semibold">Twitter</div><span class="text-gray-600">@nghuuphuoc</span></a></li><li class="flex-1"><a href="https://dev.to/phuocng" rel="noopener noreferrer" target="_blank" style="text-decoration:none"><div class="font-semibold">dev.to</div><span class="text-gray-600">@phuocng</span></a></li><li class="flex-1"><a href="https://github.com/phuoc-ng" rel="noopener noreferrer" target="_blank" style="text-decoration:none"><div class="font-semibold">GitHub</div><span class="text-gray-600">@phuoc-ng</span></a></li></ul></div><div class="pt-4">© 2020 Nguyen Huu Phuoc. All rights reserved</div></div></div></div>
+<script type="text/javascript" async="" src="https://www.google-analytics.com/analytics.js"></script><script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-139616701-7"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-139616701-7');
+</script>
+<script type="text/javascript" src="/html-dom/runtime.84ee7acf870e2850d336.js"></script><script type="text/javascript" src="/html-dom/vendor-styles.29a48c3a7835c7a67150.js"></script><script type="text/javascript" src="/html-dom/vendors.fbef9d73430672c1b7d0.js"></script><script type="text/javascript" src="/html-dom/client.5973423c0edd7eb2ee54.js"></script>
+
+</body></html>
